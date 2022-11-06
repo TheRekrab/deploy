@@ -48,9 +48,11 @@ int client_main(int argc, char** argv) {
 		printf("Current settings saved to " SETTINGS_FILE ", and will be used automatically.\n");
 	} // I don't want to save any settings that may be faulty.
 
-	free(u_data.server_addr);
-	free(u_data.filename);
-	free(u_data.new_filename);
+	if (data_result == 0 && argc != 4) {
+		free(u_data.server_addr);
+		free(u_data.filename);
+		free(u_data.new_filename);
+	}
 	
 	if (result != 0) {
 		return EXIT_FAILURE;
@@ -172,7 +174,8 @@ int do_client(const struct user_data* data) {
 	close(sfd);
 
 	if (is_corrupt) {
-		printf("NETWORK ERROR: File is corrupt, checksums do not match.");
+		printf("NETWORK ERROR: File is corrupt, checksums do not match.\n");
+		return -1;
 	}
 
 	return 0;
@@ -196,13 +199,13 @@ int load_saved_data(struct user_data* u_data) {
 	got_server_addr[strcspn(got_server_addr, "\n")] = 0x00;
 
 	// get the original filename
-	char* got_filename = malloc((size - 20) * sizeof(char));
-	fgets(got_filename, size - 20, fptr);
+	char* got_filename = malloc(size * sizeof(char));
+	fgets(got_filename, size, fptr);
 	got_filename[strcspn(got_filename, "\n")] = 0x00;
 
 	// get the new filename
-	char* got_new_filename = malloc((size - 20) * sizeof(char));
-	fgets(got_new_filename, size - 20, fptr);
+	char* got_new_filename = malloc(size * sizeof(char));
+	fgets(got_new_filename, size, fptr);
 	got_new_filename[strcspn(got_new_filename, "\n")] = 0x00;
 
 	u_data->server_addr = got_server_addr;
@@ -214,7 +217,7 @@ int load_saved_data(struct user_data* u_data) {
 }
 
 void save_data(struct user_data* u_data) {
-	FILE* fptr = fopen(SETTINGS_FILE, "w");
+	FILE* fptr = fopen(SETTINGS_FILE, "wb");
 	if (fptr == NULL) {
 		perror("fopen");
 		return;
