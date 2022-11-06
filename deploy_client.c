@@ -22,8 +22,9 @@ void prog(struct file_transfer*);
 int do_client(const struct user_data*); // I use a pointer to save memory
 int load_saved_data(struct user_data*);
 void save_data(struct user_data*); // Same here
+long md5hashit(const char*);
 
-int main(int argc, char** argv) {
+int client_main(int argc, char** argv) {
 	struct user_data u_data;
 
 	int data_result = load_saved_data(&u_data);

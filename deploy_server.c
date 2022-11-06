@@ -15,8 +15,8 @@
 
 int do_server(void);
 void load_saved_data(struct user_data*);
-
-int main(int argc, char** argv) {
+long md5hashit(const char*);
+int server_main(int argc, char** argv) {
 	
 	int pid = fork();
 	// I fork because with fork() I can run in the background and be unobtrusive.
