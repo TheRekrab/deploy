@@ -22,13 +22,12 @@ void prog(struct file_transfer*);
 int do_client(const struct user_data*); // I use a pointer to save memory
 int load_saved_data(struct user_data*);
 void save_data(struct user_data*); // Same here
-long md5hashit(const char*);
 
 int client_main(int argc, char** argv) {
 	struct user_data u_data;
 
 	int data_result = load_saved_data(&u_data);
-	if (0 > data_result && argc == 4) {
+	if (argc == 4) { // overwrite any 'saved' data
 		u_data.server_addr = argv[1];
 		u_data.filename = argv[2];
 		u_data.new_filename = argv[3];
@@ -160,23 +159,8 @@ int do_client(const struct user_data* data) {
 	// once this loop is done, we will be done with the file:
 	fclose(file);
 
-	// recieve hash for the file from the server (verification)
-	long server_sum;
-	recv(sfd, &server_sum, sizeof(long), 0);
-
-	long client_sum = md5hashit(filename);
-
-	bool is_corrupt = (client_sum != server_sum);
-
-	send(sfd, &is_corrupt, sizeof(bool), 0);
-	
 	// we're finally done with the socket!
 	close(sfd);
-
-	if (is_corrupt) {
-		printf("NETWORK ERROR: File is corrupt, checksums do not match.\n");
-		return -1;
-	}
 
 	return 0;
 }

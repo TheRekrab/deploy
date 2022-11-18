@@ -15,7 +15,6 @@
 
 int do_server(void);
 void load_saved_data(struct user_data*);
-long md5hashit(const char*);
 int server_main(int argc, char** argv) {
 	
 	int pid = fork();
@@ -96,19 +95,8 @@ int do_server(void) {
 	// close the file
 	fclose(newfile);
 
-	// verification time!
-	long sum = md5hashit(filename);
-	send(cfd, &sum, sizeof(long), 0);
-
-	bool is_corrupt;
-	recv(cfd, &is_corrupt, sizeof(bool), 0);
-
-	if (is_corrupt) {
-		remove(filename); // the transaction did not go well, the file is wrong.
-	}
-	
-	// close the cfd.
-	close(cfd);
+	// shtdown the socket
+	shutdown(sfd, SHUT_RDWR);
 
 	// free filename
 	free(filename);
